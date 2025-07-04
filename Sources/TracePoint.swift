@@ -112,26 +112,76 @@ extension TracePoint: CustomStringConvertible {
     /// The description includes the timestamp, location information, subject,
     /// and filename in a readable format suitable for logging and debugging.
     public var description: String {
-        "\(formattedTimestamp) | \(line):\(function) | \(subjectString) | \(fileLastPathComponent)"
+        printableOrder.joined(separator: " | ")
     }
 }
 
-/// Private extension containing utility methods for string formatting.
-private extension TracePoint {
+/// Extension containing utility methods for string formatting.
+public extension TracePoint {
+
+    /// Returns an ordered array of formatted string components for the trace point.
+    ///
+    /// This property provides the default ordering of trace point components used in
+    /// the string representation. The order is designed to provide the most useful
+    /// information first for debugging and logging purposes.
+    ///
+    /// ## Component Order
+    ///
+    /// 1. **Timestamp** - When the trace point was created
+    /// 2. **Line and Function** - Where in the code it was created
+    /// 3. **Subject** - The traced value or message
+    /// 4. **File** - Which source file contains the trace point
+    ///
+    /// ## Example Output
+    ///
+    /// ```swift
+    /// let trace = TracePoint("Debug message")
+    /// let components = trace.printableOrder
+    /// // components contains:
+    /// // ["2025-07-04 10:30:45.123+0000", "42:myFunction()", "Debug message", "MyFile.swift"]
+    /// ```
+    ///
+    /// - Returns: An array of formatted string components in display order.
+    var printableOrder: [String] {
+        [
+            printableTimestamp,
+            printableLineFunction,
+            printableSubject,
+            printablePathComponent
+        ]
+    }
 
     /// Formats the trace point's timestamp using ISO 8601 format.
     ///
     /// - Returns: A formatted timestamp string in the format "YYYY-MM-dd HH:mm:ss.SSSZ".
-    var formattedTimestamp: String {
+    var printableTimestamp: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss.SSSZ"
         return formatter.string(from: date)
+    }
+
+    /// Formats the line number and function name for display.
+    ///
+    /// Creates a string representation combining the line number and function name
+    /// in the format "line:function", which is commonly used in debugging output.
+    ///
+    /// ## Example Output
+    ///
+    /// ```
+    /// "42:myFunction()"
+    /// "125:init(subject:file:line:function:)"
+    /// "87:description"
+    /// ```
+    ///
+    /// - Returns: A formatted string containing the line number and function name.
+    var printableLineFunction: String {
+        return "\(line):\(function)"
     }
     
     /// Extracts the last path component from the file path.
     ///
     /// - Returns: The filename without the full path (e.g., "TracePoint.swift" instead of "/path/to/TracePoint.swift").
-    var fileLastPathComponent: String {
+    var printablePathComponent: String {
         return (file as NSString).lastPathComponent
     }
     
@@ -141,7 +191,7 @@ private extension TracePoint {
     /// For non-optional types, it returns the string representation of the subject.
     ///
     /// - Returns: A string representation of the subject.
-    var subjectString: String {
+    var printableSubject: String {
         let mirror = Mirror(reflecting: subject)
         if mirror.displayStyle == .optional {
             if let unwrapped = mirror.children.first?.value {
