@@ -1,2 +1,2 @@
-# swift-trace-points
+# TracePoints
 Lightweight debugging utility for creating structured trace points 
