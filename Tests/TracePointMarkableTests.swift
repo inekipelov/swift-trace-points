@@ -53,37 +53,37 @@ final class TracePointMarkableTests: XCTestCase {
     func testTracePointMarkableProtocolBasicImplementation() {
         let testStruct = TestStruct(name: "TestData", value: 42)
         
-        // Test that trace method exists and can be called
-        XCTAssertNoThrow(testStruct.trace())
+        // Test that markTracePoint method exists and can be called
+        XCTAssertNoThrow(testStruct.markTracePoint())
     }
     
-    func testTraceMethodWithDefaultParameters() {
+    func testMarkTracePointWithDefaultParameters() {
         let testClass = TestClass(identifier: "test-123")
         
         // Should work with all default parameters
-        XCTAssertNoThrow(testClass.trace())
+        XCTAssertNoThrow(testClass.markTracePoint())
     }
     
-    func testTraceMethodWithCustomParameters() {
+    func testMarkTracePointWithCustomParameters() {
         let testStruct = TestStruct(name: "Custom", value: 100)
         let customDate = Date(timeIntervalSince1970: 1704067200) // Jan 1, 2024
         
-        XCTAssertNoThrow(testStruct.trace(customDate, "CustomFile.swift", 42, "customMethod()"))
+        XCTAssertNoThrow(testStruct.markTracePoint(customDate, "CustomFile.swift", 42, "customMethod()"))
     }
     
     // MARK: - Traced Method Tests
     
-    func testTracedMethodReturnsOriginalValue() {
+    func testMarkTracePointReturnsOriginalValue() {
         let original = TestStruct(name: "Original", value: 123)
-        let traced = original.traced()
+        let traced = original.markTracePoint()
         
         XCTAssertEqual(original.name, traced.name)
         XCTAssertEqual(original.value, traced.value)
     }
     
-    func testTracedMethodWithClass() {
+    func testMarkTracePointWithClass() {
         let original = TestClass(identifier: "class-test", counter: 5)
-        let traced = original.traced()
+        let traced = original.markTracePoint()
         
         // Should return the same instance for reference types
         XCTAssertTrue(original === traced)
@@ -91,13 +91,13 @@ final class TracePointMarkableTests: XCTestCase {
         XCTAssertEqual(original.counter, traced.counter)
     }
     
-    func testTracedMethodChaining() {
+    func testMarkTracePointChaining() {
         let testClass = TestClass(identifier: "chain-test")
         
         let result = testClass
-            .traced()
-            .traced()
-            .traced()
+            .markTracePoint()
+            .markTracePoint()
+            .markTracePoint()
         
         XCTAssertTrue(testClass === result)
         XCTAssertEqual(testClass.identifier, result.identifier)
@@ -105,11 +105,11 @@ final class TracePointMarkableTests: XCTestCase {
     
     // MARK: - Output Stream Tests
     
-    func testTraceToOutputStream() {
+    func testMarkTracePointToOutputStream() {
         var output = ""
         let testStruct = TestStruct(name: "OutputTest", value: 999)
         
-        testStruct.trace(to: &output)
+        testStruct.markTracePoint(to: &output)
         
         XCTAssertFalse(output.isEmpty)
         XCTAssertTrue(output.contains("OutputTest"))
@@ -117,11 +117,11 @@ final class TracePointMarkableTests: XCTestCase {
         XCTAssertTrue(output.contains("TracePointMarkableTests.swift"))
     }
     
-    func testTracedToOutputStream() {
+    func testMarkTracePointToOutputStreamReturnsSelf() {
         var output = ""
         let testClass = TestClass(identifier: "output-class", counter: 7)
         
-        let result = testClass.traced(to: &output)
+        let result = testClass.markTracePoint(to: &output)
         
         XCTAssertTrue(testClass === result)
         XCTAssertFalse(output.isEmpty)
@@ -129,15 +129,15 @@ final class TracePointMarkableTests: XCTestCase {
         XCTAssertTrue(output.contains("7"))
     }
     
-    func testMultipleTracesToSameStream() {
+    func testMultipleMarkTracePointsToSameStream() {
         var output = ""
         let struct1 = TestStruct(name: "First", value: 1)
         let struct2 = TestStruct(name: "Second", value: 2)
         let struct3 = TestStruct(name: "Third", value: 3)
         
-        struct1.trace(to: &output)
-        struct2.trace(to: &output)
-        struct3.trace(to: &output)
+        struct1.markTracePoint(to: &output)
+        struct2.markTracePoint(to: &output)
+        struct3.markTracePoint(to: &output)
         
         XCTAssertTrue(output.contains("First"))
         XCTAssertTrue(output.contains("Second"))
@@ -149,7 +149,7 @@ final class TracePointMarkableTests: XCTestCase {
     
     // MARK: - Complex Data Type Tests
     
-    func testComplexDataTracing() {
+    func testComplexDataMarkTracePoint() {
         let complexData = ComplexData(
             id: UUID(),
             metadata: ["key1": "value1", "key2": 42],
@@ -157,18 +157,18 @@ final class TracePointMarkableTests: XCTestCase {
         )
         
         var output = ""
-        complexData.trace(to: &output)
+        complexData.markTracePoint(to: &output)
         
         XCTAssertFalse(output.isEmpty)
         XCTAssertTrue(output.contains("ComplexData"))
     }
     
-    func testComplexDataTraced() {
+    func testComplexDataMarkTracePointReturnsValue() {
         let original = ComplexData(
             metadata: ["test": "data", "number": 123]
         )
         
-        let traced = original.traced()
+        let traced = original.markTracePoint()
         
         XCTAssertEqual(original.id, traced.id)
         XCTAssertEqual(original.timestamp, traced.timestamp)
@@ -176,12 +176,12 @@ final class TracePointMarkableTests: XCTestCase {
     
     // MARK: - Custom Parameters Tests
     
-    func testTraceWithAllCustomParameters() {
+    func testMarkTracePointWithAllCustomParameters() {
         let testStruct = TestStruct(name: "CustomParams", value: 555)
         let customDate = Date(timeIntervalSince1970: 1672531200) // Jan 1, 2023
         var output = ""
         
-        testStruct.trace(customDate, "TestFile.swift", 100, "testFunction()", to: &output)
+        testStruct.markTracePoint(customDate, "TestFile.swift", 100, "testFunction()", to: &output)
         
         XCTAssertTrue(output.contains("2023"))
         XCTAssertTrue(output.contains("TestFile.swift"))
@@ -190,12 +190,12 @@ final class TracePointMarkableTests: XCTestCase {
         XCTAssertTrue(output.contains("555"))
     }
     
-    func testTracedWithCustomParameters() {
+    func testMarkTracePointWithCustomParametersAndOutputStream() {
         let testClass = TestClass(identifier: "custom-traced")
         let customDate = Date(timeIntervalSince1970: 1640995200) // Jan 1, 2022
         var output = ""
         
-        let result = testClass.traced(customDate, "TracedFile.swift", 200, "tracedFunction()", to: &output)
+        let result = testClass.markTracePoint(customDate, "TracedFile.swift", 200, "tracedFunction()", to: &output)
         
         XCTAssertTrue(testClass === result)
         XCTAssertTrue(output.contains("2022"))
@@ -205,21 +205,21 @@ final class TracePointMarkableTests: XCTestCase {
     
     // MARK: - Method Interaction Tests
     
-    func testTraceAfterMethodCall() {
+    func testMarkTracePointAfterMethodCall() {
         let testClass = TestClass(identifier: "method-test", counter: 0)
         
         testClass.increment()
-        _ = testClass.traced()
+        _ = testClass.markTracePoint()
         testClass.increment()
         
         XCTAssertEqual(testClass.counter, 2)
     }
     
-    func testTracedInMethodChain() {
+    func testMarkTracePointInMethodChain() {
         let testClass = TestClass(identifier: "chain-method")
         
         testClass.increment()
-        let result = testClass.traced()
+        let result = testClass.markTracePoint()
         result.increment()
         
         XCTAssertEqual(testClass.counter, 2)
@@ -228,22 +228,22 @@ final class TracePointMarkableTests: XCTestCase {
     
     // MARK: - Edge Cases Tests
     
-    func testTraceWithEmptyStringFields() {
+    func testMarkTracePointWithEmptyStringFields() {
         let emptyStruct = TestStruct(name: "", value: 0)
         var output = ""
         
-        let result = emptyStruct.traced(to: &output)
+        let result = emptyStruct.markTracePoint(to: &output)
         
         XCTAssertEqual(result.name, "")
         XCTAssertEqual(result.value, 0)
         XCTAssertFalse(output.isEmpty)
     }
     
-    func testTraceWithSpecialCharacters() {
+    func testMarkTracePointWithSpecialCharacters() {
         let specialStruct = TestStruct(name: "Test!@#$%^&*()", value: -999)
         var output = ""
         
-        specialStruct.trace(to: &output)
+        specialStruct.markTracePoint(to: &output)
         
         XCTAssertTrue(output.contains("Test!@#$%^&*()"))
         XCTAssertTrue(output.contains("-999"))
@@ -252,23 +252,23 @@ final class TracePointMarkableTests: XCTestCase {
         
     // MARK: - Performance Tests
     
-    func testTracePerformance() {
+    func testMarkTracePointPerformance() {
         let testStruct = TestStruct(name: "Performance", value: 1)
         
         measure {
             for _ in 0..<1000 {
-                _ = testStruct.traced()
+                _ = testStruct.markTracePoint()
             }
         }
     }
     
-    func testTraceToStreamPerformance() {
+    func testMarkTracePointToStreamPerformance() {
         let testStruct = TestStruct(name: "StreamPerf", value: 2)
         var output = ""
         
         measure {
             for _ in 0..<1000 {
-                testStruct.trace(to: &output)
+                testStruct.markTracePoint(to: &output)
             }
         }
     }
@@ -302,7 +302,7 @@ extension TracePointMarkableTests {
     /// Helper to capture trace output for analysis
     private func captureTrace<T: TracePointMarkable>(from value: T) -> String {
         var output = ""
-        value.trace(to: &output)
+        value.markTracePoint(to: &output)
         return output
     }
 }

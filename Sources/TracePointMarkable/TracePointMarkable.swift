@@ -3,52 +3,33 @@ import Foundation
 ///
 /// This protocol provides a unified interface for creating trace points from any conforming type,
 /// automatically capturing location information where the method is called.
-public protocol TracePointMarkable {
-    func trace(_ date: Date, _ file: String, _ line: Int, _ function: String)
-    func trace<Target>(_ date: Date, _ file: String, _ line: Int, _ function: String, to: inout Target) where Target: TextOutputStream
-}
+public protocol TracePointMarkable {}
 
 /// Default implementation of TracePointMarkable.
 public extension TracePointMarkable {
-    func trace(
-        _ date: Date = Date(),
-        _ file: String = #file,
-        _ line: Int = #line,
-        _ function: String = #function
-    ) {
-        let tracePoint = TracePoint(self, date, file, line, function)
-        tracePoint.print()
-    }
     
-    func trace<Target>(
-        _ date: Date = Date(),
-        _ file: String = #file,
-        _ line: Int = #line,
-        _ function: String = #function,
-        to output: inout Target
-    ) where Target: TextOutputStream {
-        let tracePoint = TracePoint(self, date, file, line, function)
-        tracePoint.print(to: &output)
-    }
-
-    func traced(
+    @discardableResult
+    func markTracePoint(
         _ date: Date = Date(),
         _ file: String = #file,
         _ line: Int = #line,
         _ function: String = #function
     ) -> Self {
-        self.trace(date, file, line, function)
+        let tracePoint = TracePoint(self, date, file, line, function)
+        tracePoint.print()
         return self
     }
 
-    func traced<Target>(
+    @discardableResult
+    func markTracePoint<Target>(
         _ date: Date = Date(),
         _ file: String = #file,
         _ line: Int = #line,
         _ function: String = #function,
         to output: inout Target
     ) -> Self where Target: TextOutputStream {
-        self.trace(date, file, line, function, to: &output)
+        let tracePoint = TracePoint(self, date, file, line, function)
+        tracePoint.print(to: &output)
         return self
     }
 }
