@@ -38,6 +38,9 @@ public struct TracePoint<Subject>: Error {
     /// The function name where the trace point was created.
     let function: String
 
+    /// An optional label for the trace point, providing additional context.
+    let label: String?
+
     /// Creates a new trace point with the specified subject.
     ///
     /// - Parameters:
@@ -50,13 +53,15 @@ public struct TracePoint<Subject>: Error {
         _ date: Date = Date(),
         _ file: String = #file,
         _ line: Int = #line,
-        _ function: String = #function
+        _ function: String = #function,
+        label: String? = nil
     ) {
         self.subject = subject
         self.date = date
         self.line = line
         self.file = file
         self.function = function
+        self.label = label
     }
 }
 
@@ -87,13 +92,15 @@ public extension TracePoint where Subject == Optional<Any> {
         _ date: Date = Date(),
         _ file: String = #file,
         _ line: Int = #line,
-        _ function: String = #function
+        _ function: String = #function,
+        label: String? = nil
     ) {
         self.subject = subject
         self.date = date
         self.line = line
         self.file = file
         self.function = function
+        self.label = label
     }
 }
 
@@ -104,11 +111,12 @@ public extension TracePoint where Subject == Optional<Any> {
 /// - Line number and function name
 /// - Subject description
 /// - File name (last path component)
+/// - Optional label if provided
 ///
 /// ## Output Format
 ///
 /// ```
-/// 2025-07-04 10:30:45.123+0000 | 42:myFunction() | Debug message | MyFile.swift
+/// 2025-07-04 10:30:45.123+0000 | 42:myFunction() | message = Debug message | MyFile.swift
 /// ```
 extension TracePoint: CustomStringConvertible {
     /// A formatted string representation of the trace point.
@@ -196,15 +204,16 @@ extension TracePoint {
     ///
     /// - Returns: A string representation of the subject.
     var printableSubject: String? {
+        let labelPart = label.map { "\($0) = " } ?? ""
         let mirror = Mirror(reflecting: subject)
         if mirror.displayStyle == .optional {
             if let unwrapped = mirror.children.first?.value {
-                return "\(unwrapped)"
+                return "\(labelPart)\(unwrapped)"
             } else {
                 return nil
             }
         } else {
-            return "\(subject)"
+            return "\(labelPart)\(subject)"
         }
     }
 }

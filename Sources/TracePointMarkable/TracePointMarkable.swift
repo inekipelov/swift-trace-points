@@ -13,9 +13,10 @@ public extension TracePointMarkable {
         _ date: Date = Date(),
         _ file: String = #file,
         _ line: Int = #line,
-        _ function: String = #function
+        _ function: String = #function,
+        label: String? = nil
     ) -> Self {
-        let tracePoint = TracePoint(self, date, file, line, function)
+        let tracePoint = TracePoint(self, date, file, line, function, label: label)
         tracePoint.print()
         return self
     }
@@ -26,9 +27,10 @@ public extension TracePointMarkable {
         _ file: String = #file,
         _ line: Int = #line,
         _ function: String = #function,
+        label: String? = nil,
         to output: inout Target
     ) -> Self where Target: TextOutputStream {
-        let tracePoint = TracePoint(self, date, file, line, function)
+        let tracePoint = TracePoint(self, date, file, line, function, label: label)
         tracePoint.print(to: &output)
         return self
     }
