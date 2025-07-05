@@ -17,18 +17,18 @@ import TracePoints
 
 func foo() {
     // Basic tracing
-    "Debug message".trace()
+    "Debug message".markTracePoint()
 
     // Trace any value
-    42.trace()
-    someObject.trace()
+    42.markTracePoint()
+    someObject.markTracePoint()
 
     // Chain tracing
-    let result = myFunction().traced()
+    let result = myFunction().markTracePoint()
 
     // Custom output
     var output = ""
-    "Debug".trace(to: &output)
+    "Debug".markTracePoint(to: &output)
 }
 
 ```
