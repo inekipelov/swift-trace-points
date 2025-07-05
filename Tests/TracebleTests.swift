@@ -17,7 +17,7 @@ final class TracebleTests: XCTestCase {
     }
     
     /// User-defined class that conforms to Traceble
-    class TestClass: Traceble {
+    class TestClass: Traceble, CustomStringConvertible {
         let identifier: String
         var counter: Int
         
@@ -28,6 +28,10 @@ final class TracebleTests: XCTestCase {
         
         func increment() {
             counter += 1
+        }
+        
+        var description: String {
+            return "TestClass(identifier: \"\(identifier)\", counter: \(counter))"
         }
     }
     
@@ -244,7 +248,8 @@ final class TracebleTests: XCTestCase {
         XCTAssertTrue(output.contains("Test!@#$%^&*()"))
         XCTAssertTrue(output.contains("-999"))
     }
-    
+
+        
     // MARK: - Performance Tests
     
     func testTracePerformance() {
