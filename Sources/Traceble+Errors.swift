@@ -79,6 +79,7 @@ extension CNError: Traceble {}
 import Photos
 
 /// Extension for Photos error types to add tracePoint functionality.
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension PHPhotosError: Traceble {}
 #endif
 
