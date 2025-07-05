@@ -3,13 +3,13 @@ import Foundation
 ///
 /// This protocol provides a unified interface for creating trace points from any conforming type,
 /// automatically capturing location information where the method is called.
-public protocol Traceble {
+public protocol TracePointMarkable {
     func trace(_ date: Date, _ file: String, _ line: Int, _ function: String)
     func trace<Target>(_ date: Date, _ file: String, _ line: Int, _ function: String, to: inout Target) where Target: TextOutputStream
 }
 
-/// Default implementation of Traceble.
-public extension Traceble {
+/// Default implementation of TracePointMarkable.
+public extension TracePointMarkable {
     func trace(
         _ date: Date = Date(),
         _ file: String = #file,

@@ -6,10 +6,10 @@
 
 /// Extension for Task type to add tracePoint functionality.
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
-extension Task: Traceble where Success: Any, Failure: Error {}
+extension Task: TracePointMarkable where Success: Any, Failure: Error {}
 
 /// Extension for TaskPriority type to add tracePoint functionality.
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
-extension TaskPriority: Traceble {}
+extension TaskPriority: TracePointMarkable {}
 
 #endif

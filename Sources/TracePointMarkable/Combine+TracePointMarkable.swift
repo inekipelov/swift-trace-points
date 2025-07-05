@@ -7,12 +7,12 @@ import Combine
 
 /// Extension for Combine types to add tracePoint functionality.
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
-extension Just: Traceble {}
+extension Just: TracePointMarkable {}
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
-extension Empty: Traceble {}
+extension Empty: TracePointMarkable {}
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
-extension Fail: Traceble {}
+extension Fail: TracePointMarkable {}
 
 #endif

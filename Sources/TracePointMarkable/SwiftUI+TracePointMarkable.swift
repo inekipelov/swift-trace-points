@@ -7,18 +7,18 @@ import SwiftUI
 
 /// Extension for SwiftUI types to add tracePoint functionality.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-extension Color: Traceble {}
+extension Color: TracePointMarkable {}
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-extension Font: Traceble {}
+extension Font: TracePointMarkable {}
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-extension EdgeInsets: Traceble {}
+extension EdgeInsets: TracePointMarkable {}
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-extension Angle: Traceble {}
+extension Angle: TracePointMarkable {}
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-extension UnitPoint: Traceble {}
+extension UnitPoint: TracePointMarkable {}
 
 #endif

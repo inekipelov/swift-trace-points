@@ -1,12 +1,12 @@
 import XCTest
 @testable import TracePoints
 
-final class TracebleTests: XCTestCase {
+final class TracePointMarkableTests: XCTestCase {
     
     // MARK: - Test User Defined Types
     
-    /// Simple user-defined struct that conforms to Traceble
-    struct TestStruct: Traceble {
+    /// Simple user-defined struct that conforms to TracePointMarkable
+    struct TestStruct: TracePointMarkable {
         let name: String
         let value: Int
         
@@ -16,8 +16,8 @@ final class TracebleTests: XCTestCase {
         }
     }
     
-    /// User-defined class that conforms to Traceble
-    class TestClass: Traceble, CustomStringConvertible {
+    /// User-defined class that conforms to TracePointMarkable
+    class TestClass: TracePointMarkable, CustomStringConvertible {
         let identifier: String
         var counter: Int
         
@@ -36,7 +36,7 @@ final class TracebleTests: XCTestCase {
     }
     
     /// Complex user-defined type with nested data
-    struct ComplexData: Traceble {
+    struct ComplexData: TracePointMarkable {
         let id: UUID
         let metadata: [String: Any]
         let timestamp: Date
@@ -50,7 +50,7 @@ final class TracebleTests: XCTestCase {
     
     // MARK: - Basic Protocol Implementation Tests
     
-    func testTracebleProtocolBasicImplementation() {
+    func testTracePointMarkableProtocolBasicImplementation() {
         let testStruct = TestStruct(name: "TestData", value: 42)
         
         // Test that trace method exists and can be called
@@ -114,7 +114,7 @@ final class TracebleTests: XCTestCase {
         XCTAssertFalse(output.isEmpty)
         XCTAssertTrue(output.contains("OutputTest"))
         XCTAssertTrue(output.contains("999"))
-        XCTAssertTrue(output.contains("TracebleTests.swift"))
+        XCTAssertTrue(output.contains("TracePointMarkableTests.swift"))
     }
     
     func testTracedToOutputStream() {
@@ -276,7 +276,7 @@ final class TracebleTests: XCTestCase {
 
 // MARK: - Helper Extensions for Testing
 
-extension TracebleTests {
+extension TracePointMarkableTests {
     
     /// Helper method to validate trace output format
     private func validateTraceOutput(_ output: String, expectedSubject: String? = nil) {
@@ -291,7 +291,7 @@ extension TracebleTests {
         XCTAssertTrue(timestamp.contains(":"), "Timestamp should contain time separators")
         
         // Validate file name presence
-        XCTAssertTrue(output.contains("TracebleTests.swift"), "Should contain test file name")
+        XCTAssertTrue(output.contains("TracePointMarkableTests.swift"), "Should contain test file name")
         
         // Validate subject if provided
         if let expectedSubject = expectedSubject {
@@ -300,7 +300,7 @@ extension TracebleTests {
     }
     
     /// Helper to capture trace output for analysis
-    private func captureTrace<T: Traceble>(from value: T) -> String {
+    private func captureTrace<T: TracePointMarkable>(from value: T) -> String {
         var output = ""
         value.trace(to: &output)
         return output
