@@ -25,6 +25,9 @@ import Foundation
 public struct TracePoint<Subject>: Error {
     /// The subject being traced. Can be any type.
     let subject: Subject
+
+    /// The timestamp when the trace point was created.
+    let date: Date
     
     /// The file path where the trace point was created.
     let file: String
@@ -34,9 +37,6 @@ public struct TracePoint<Subject>: Error {
     
     /// The function name where the trace point was created.
     let function: String
-    
-    /// The timestamp when the trace point was created.
-    let date: Date = Date()
 
     /// Creates a new trace point with the specified subject.
     ///
@@ -47,11 +47,13 @@ public struct TracePoint<Subject>: Error {
     ///   - function: The function name (automatically filled with `#function`).
     init(
         _ subject: Subject,
+        _ date: Date = Date(),
         _ file: String = #file,
         _ line: Int = #line,
         _ function: String = #function
     ) {
         self.subject = subject
+        self.date = date
         self.line = line
         self.file = file
         self.function = function
@@ -82,11 +84,13 @@ public extension TracePoint where Subject == Optional<Any> {
     ///   - function: The function name (automatically filled with `#function`).
     init(
         _ subject: Any? = nil,
+        _ date: Date = Date(),
         _ file: String = #file,
         _ line: Int = #line,
         _ function: String = #function
     ) {
         self.subject = subject
+        self.date = date
         self.line = line
         self.file = file
         self.function = function
@@ -117,7 +121,7 @@ extension TracePoint: CustomStringConvertible {
 }
 
 /// Extension containing utility methods for string formatting.
-public extension TracePoint {
+extension TracePoint {
 
     /// Returns an ordered array of formatted string components for the trace point.
     ///
@@ -129,7 +133,7 @@ public extension TracePoint {
     ///
     /// 1. **Timestamp** - When the trace point was created
     /// 2. **Line and Function** - Where in the code it was created
-    /// 3. **Subject** - The traced value or message
+    /// 3. **Subject** - The traced value or message, or skip if nil
     /// 4. **File** - Which source file contains the trace point
     ///
     /// ## Example Output
@@ -147,8 +151,8 @@ public extension TracePoint {
             printableTimestamp,
             printableLineFunction,
             printableSubject,
-            printablePathComponent
-        ]
+            printableFile
+        ].compactMap { $0 }
     }
 
     /// Formats the trace point's timestamp using ISO 8601 format.
@@ -181,7 +185,7 @@ public extension TracePoint {
     /// Extracts the last path component from the file path.
     ///
     /// - Returns: The filename without the full path (e.g., "TracePoint.swift" instead of "/path/to/TracePoint.swift").
-    var printablePathComponent: String {
+    var printableFile: String {
         return (file as NSString).lastPathComponent
     }
     
@@ -191,13 +195,13 @@ public extension TracePoint {
     /// For non-optional types, it returns the string representation of the subject.
     ///
     /// - Returns: A string representation of the subject.
-    var printableSubject: String {
+    var printableSubject: String? {
         let mirror = Mirror(reflecting: subject)
         if mirror.displayStyle == .optional {
             if let unwrapped = mirror.children.first?.value {
                 return "\(unwrapped)"
             } else {
-                return ""
+                return nil
             }
         } else {
             return "\(subject)"

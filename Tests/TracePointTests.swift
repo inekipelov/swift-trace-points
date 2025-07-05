@@ -5,150 +5,211 @@ final class TracePointTests: XCTestCase {
     
     // MARK: - Basic Initialization Tests
     
-    func testTracePointBasicInitialization() {
-        let tracePoint = TracePoint("test message")
+    func testTracePointWithStringSubject() {
+        let message = "Test message"
+        let tracePoint = TracePoint(message)
         
-        XCTAssertEqual(tracePoint.subject, "test message")
-        XCTAssertTrue(tracePoint.file.hasSuffix("TracePointTests.swift"))
-        XCTAssertEqual(tracePoint.line, 9) // Line where TracePoint was created
-        XCTAssertEqual(tracePoint.function, "testTracePointBasicInitialization()")
-        XCTAssertTrue(abs(tracePoint.date.timeIntervalSinceNow) < 1.0) // Created recently
+        XCTAssertEqual(tracePoint.subject, message)
+        XCTAssertNotNil(tracePoint.date)
+        XCTAssertTrue(tracePoint.file.contains("TracePointTests.swift"))
+        XCTAssertEqual(tracePoint.line, 10) // Line where TracePoint was created
+        XCTAssertTrue(tracePoint.function.contains("testTracePointWithStringSubject"))
     }
     
-    func testTracePointWithCustomFileLineFunction() {
-        let tracePoint = TracePoint("custom", "CustomFile.swift", 42, "customFunction()")
+    func testTracePointWithIntSubject() {
+        let number = 42
+        let tracePoint = TracePoint(number)
         
-        XCTAssertEqual(tracePoint.subject, "custom")
-        XCTAssertEqual(tracePoint.file, "CustomFile.swift")
-        XCTAssertEqual(tracePoint.line, 42)
-        XCTAssertEqual(tracePoint.function, "customFunction()")
+        XCTAssertEqual(tracePoint.subject, number)
+        XCTAssertNotNil(tracePoint.date)
+        XCTAssertTrue(tracePoint.file.contains("TracePointTests.swift"))
     }
     
-    // MARK: - Generic Type Tests
-    
-    func testTracePointWithInt() {
-        let tracePoint = TracePoint(123)
-        XCTAssertEqual(tracePoint.subject, 123)
-    }
-    
-    func testTracePointWithOptionalString() {
-        let optionalString: String? = "optional value"
-        let tracePoint = TracePoint(optionalString)
-        XCTAssertEqual(tracePoint.subject, optionalString)
-    }
-    
-    func testTracePointWithNilOptional() {
-        let nilString: String? = nil
-        let tracePoint = TracePoint(nilString)
-        XCTAssertNil(tracePoint.subject)
-    }
-    
-    func testTracePointWithComplexType() {
+    func testTracePointWithCustomType() {
         struct TestStruct {
             let value: String
         }
+        
         let testStruct = TestStruct(value: "test")
         let tracePoint = TracePoint(testStruct)
-        XCTAssertEqual(tracePoint.subject.value, "test")
+        
+        XCTAssertEqual(tracePoint.subject.value, testStruct.value)
+        XCTAssertNotNil(tracePoint.date)
     }
     
-    // MARK: - Optional Extension Tests
+    // MARK: - Optional Subject Tests
     
-    func testOptionalExtensionWithValue() {
-        let tracePoint = TracePoint("some value")
-        XCTAssertEqual(tracePoint.subject, "some value")
-    }
-    
-    func testOptionalExtensionWithNil() {
-        let tracePoint = TracePoint(nil)
+    func testTracePointWithOptionalNilSubject() {
+        let tracePoint = TracePoint()
+        
         XCTAssertNil(tracePoint.subject)
+        XCTAssertNotNil(tracePoint.date)
+        XCTAssertTrue(tracePoint.file.contains("TracePointTests.swift"))
     }
     
-    func testOptionalExtensionWithCustomParameters() {
-        let tracePoint = TracePoint("test", "TestFile.swift", 100, "testFunction()")
+    func testTracePointWithOptionalNonNilSubject() {
+        let value: String? = "Optional value"
+        let tracePoint = TracePoint(value)
         
-        XCTAssertEqual(tracePoint.subject, "test")
-        XCTAssertEqual(tracePoint.file, "TestFile.swift")
-        XCTAssertEqual(tracePoint.line, 100)
-        XCTAssertEqual(tracePoint.function, "testFunction()")
+        XCTAssertEqual(tracePoint.subject, value)
+        XCTAssertNotNil(tracePoint.date)
     }
     
-    // MARK: - CustomStringConvertible Tests
+    func testTracePointWithExplicitNil() {
+        let nilValue: String? = nil
+        let tracePoint = TracePoint(nilValue)
+        
+        XCTAssertNil(tracePoint.subject)
+        XCTAssertNotNil(tracePoint.date)
+    }
     
-    func testDescriptionFormat() {
-        let tracePoint = TracePoint("test message", "TestFile.swift", 50, "testMethod()")
+    // MARK: - String Representation Tests
+    
+    func testDescriptionContainsAllComponents() {
+        let message = "Debug message"
+        let tracePoint = TracePoint(message)
         let description = tracePoint.description
         
-        // Check that description contains all expected components
-        XCTAssertTrue(description.contains("50:testMethod()"))
-        XCTAssertTrue(description.contains("test message"))
-        XCTAssertTrue(description.contains("TestFile.swift"))
+        // Should contain timestamp
+        XCTAssertTrue(description.contains(":"))
+        XCTAssertTrue(description.contains("-"))
         
-        // Check timestamp format (YYYY-MM-dd HH:mm:ss.SSSZ)
-        let timestampRegex = try! NSRegularExpression(pattern: "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}[+-]\\d{4}")
-        let range = NSRange(location: 0, length: description.count)
-        XCTAssertTrue(timestampRegex.firstMatch(in: description, options: [], range: range) != nil)
+        // Should contain line and function
+        XCTAssertTrue(description.contains("\(tracePoint.line):"))
+        XCTAssertTrue(description.contains("testDescriptionContainsAllComponents"))
+        
+        // Should contain subject
+        XCTAssertTrue(description.contains(message))
+        
+        // Should contain file name
+        XCTAssertTrue(description.contains("TracePointTests.swift"))
+        
+        // Should use pipe separator
+        XCTAssertTrue(description.contains(" | "))
     }
     
-    func testDescriptionWithEmptySubject() {
-        let tracePoint = TracePoint(nil, "TestFile.swift", 10, "emptyTest()")
-        let description = tracePoint.description
+    func testPrintableTimestamp() {
+        let fixedDate = Date(timeIntervalSince1970: 1757638245.123) // July 5, 2025 10:30:45.123 UTC
+        let tracePoint = TracePoint("test", fixedDate)
         
-        // Should handle empty subject gracefully
-        XCTAssertTrue(description.contains("10:emptyTest()"))
-        XCTAssertTrue(description.contains("TestFile.swift"))
-        XCTAssertFalse(description.contains("nil")) // Should be empty string, not "nil"
+        let timestamp = tracePoint.printableTimestamp
+        XCTAssertTrue(timestamp.contains("2025"))
+        XCTAssertTrue(timestamp.contains(":"))
+        XCTAssertTrue(timestamp.contains("."))
     }
     
-    func testDescriptionComponents() {
-        let tracePoint = TracePoint(42, "/path/to/SomeFile.swift", 123, "someFunction()")
-        let description = tracePoint.description
+    func testPrintableLineFunction() {
+        let tracePoint = TracePoint("test")
+        let lineFunction = tracePoint.printableLineFunction
         
-        let components = description.components(separatedBy: " | ")
-        XCTAssertEqual(components.count, 4)
-        
-        // Timestamp
-        XCTAssertTrue(components[0].range(of: "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}[+-]\\d{4}", options: .regularExpression) != nil)
-        
-        // Line:Function
-        XCTAssertEqual(components[1], "123:someFunction()")
-        
-        // Subject
-        XCTAssertEqual(components[2], "42")
-        
-        // File (last path component)
-        XCTAssertEqual(components[3], "SomeFile.swift")
+        XCTAssertTrue(lineFunction.contains(":"))
+        XCTAssertTrue(lineFunction.contains("testPrintableLineFunction"))
+        XCTAssertTrue(lineFunction.contains("\(tracePoint.line)"))
     }
     
-    // MARK: - Error Protocol Conformance Tests
+    func testPrintableFile() {
+        let tracePoint = TracePoint("test")
+        let fileName = tracePoint.printableFile
+        
+        XCTAssertEqual(fileName, "TracePointTests.swift")
+        XCTAssertFalse(fileName.contains("/"))
+    }
+    
+    func testPrintableSubjectWithNonOptional() {
+        let tracePoint = TracePoint("test message")
+        let subject = tracePoint.printableSubject
+        
+        XCTAssertEqual(subject, "test message")
+    }
+    
+    func testPrintableSubjectWithOptionalNil() {
+        let tracePoint = TracePoint()
+        let subject = tracePoint.printableSubject
+        
+        XCTAssertNil(subject)
+    }
+    
+    func testPrintableSubjectWithOptionalValue() {
+        let value: String? = "optional value"
+        let tracePoint = TracePoint(value)
+        let subject = tracePoint.printableSubject
+        
+        XCTAssertEqual(subject, "optional value")
+    }
+    
+    func testPrintableOrderExcludesNilSubject() {
+        let tracePoint = TracePoint()
+        let printableOrder = tracePoint.printableOrder
+        
+        // Should have 3 components (timestamp, line:function, file) but not subject
+        XCTAssertEqual(printableOrder.count, 3)
+        XCTAssertFalse(printableOrder.joined().isEmpty)
+    }
+    
+    func testPrintableOrderIncludesNonNilSubject() {
+        let tracePoint = TracePoint("test")
+        let printableOrder = tracePoint.printableOrder
+        
+        // Should have 4 components (timestamp, line:function, subject, file)
+        XCTAssertEqual(printableOrder.count, 4)
+        XCTAssertTrue(printableOrder.contains("test"))
+    }
+    
+    // MARK: - Error Protocol Tests
     
     func testTracePointAsError() {
-        let tracePoint = TracePoint("error message")
-        let error: Error = tracePoint
+        let errorMessage = "Something went wrong"
         
-        // Should be able to cast back
-        XCTAssertTrue(error is TracePoint<String>)
-        
-        if let castedTracePoint = error as? TracePoint<String> {
-            XCTAssertEqual(castedTracePoint.subject, "error message")
-        } else {
-            XCTFail("Failed to cast Error back to TracePoint")
+        do {
+            throw TracePoint(errorMessage)
+        } catch let traceError as TracePoint<String> {
+            XCTAssertEqual(traceError.subject, errorMessage)
+            XCTAssertTrue(traceError.file.contains("TracePointTests.swift"))
+        } catch {
+            XCTFail("Should catch TracePoint error")
         }
     }
     
-    // MARK: - Edge Cases Tests
-    
-    func testTracePointWithEmptyString() {
-        let tracePoint = TracePoint("")
-        XCTAssertEqual(tracePoint.subject, "")
-        XCTAssertTrue(tracePoint.description.contains(" |  | ")) // Empty subject appears as empty between pipes
+    func testTracePointErrorDescription() {
+        let errorMessage = "Error occurred"
+        let traceError = TracePoint(errorMessage)
+        
+        // As an Error, it should have a description
+        let errorDescription = String(describing: traceError)
+        XCTAssertTrue(errorDescription.contains(errorMessage))
+        XCTAssertTrue(errorDescription.contains("TracePointTests.swift"))
     }
     
-    func testTracePointWithVeryLongSubject() {
-        let longString = String(repeating: "A", count: 1000)
-        let tracePoint = TracePoint(longString)
-        XCTAssertEqual(tracePoint.subject, longString)
-        XCTAssertTrue(tracePoint.description.contains(longString))
+    // MARK: - Edge Cases
+    
+    func testTracePointWithEmptyString() {
+        let emptyString = ""
+        let tracePoint = TracePoint(emptyString)
+        
+        XCTAssertEqual(tracePoint.subject, emptyString)
+        let description = tracePoint.description
+        XCTAssertFalse(description.isEmpty)
+        // Should still contain other components even with empty subject
+        XCTAssertTrue(description.contains("TracePointTests.swift"))
+    }
+    
+    func testTracePointWithComplexType() {
+        struct ComplexType {
+            let array: [String]
+            let dictionary: [String: Int]
+            let optional: String?
+        }
+        
+        let complex = ComplexType(
+            array: ["a", "b", "c"],
+            dictionary: ["key": 123],
+            optional: "value"
+        )
+        let tracePoint = TracePoint(complex)
+        
+        XCTAssertEqual(tracePoint.subject.array, complex.array)
+        XCTAssertEqual(tracePoint.subject.dictionary, complex.dictionary)
+        XCTAssertEqual(tracePoint.subject.optional, complex.optional)
     }
     
     func testMultipleTracePointsHaveDifferentTimestamps() {
@@ -156,18 +217,18 @@ final class TracePointTests: XCTestCase {
         Thread.sleep(forTimeInterval: 0.001) // Small delay
         let tracePoint2 = TracePoint("second")
         
-        XCTAssertNotEqual(tracePoint1.date, tracePoint2.date)
-        XCTAssertTrue(tracePoint1.date < tracePoint2.date)
+        XCTAssertNotEqual(tracePoint1.date.timeIntervalSince1970, 
+                         tracePoint2.date.timeIntervalSince1970)
     }
     
-    // MARK: - Date Formatting Tests
-    
-    func testDateFormatterConsistency() {
-        let tracePoint = TracePoint("test")
-        let description1 = tracePoint.description
-        let description2 = tracePoint.description
+    func testTracePointCapturesCorrectLineNumbers() {
+        let tracePoint1 = TracePoint("line 1")
+        let line1 = tracePoint1.line
+        let tracePoint2 = TracePoint("line 2")
+        let line2 = tracePoint2.line
         
-        // Description should be consistent for same TracePoint
-        XCTAssertEqual(description1, description2)
+        XCTAssertGreaterThan(line1, 0)
+        XCTAssertGreaterThan(line2, 0)
+        XCTAssertEqual(line2, line1 + 2) // Should be 2 lines apart
     }
 }

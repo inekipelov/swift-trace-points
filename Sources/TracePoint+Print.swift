@@ -30,9 +30,11 @@ public extension TracePoint {
     /// - Parameters:
     ///   - separator: The string to print between items. Default is a single space.
     ///   - terminator: The string to print after all items. Default is a newline.
-    func print(separator: String = " | ", terminator: String = "\n") {
+    @discardableResult
+    func print(separator: String = " | ", terminator: String = "\n") -> Self {
         let description = self.printableOrder.joined(separator: separator)
         Swift.print(description, terminator: terminator)
+        return self
     }
     
     /// Prints the trace point to the specified output stream.
@@ -44,12 +46,14 @@ public extension TracePoint {
     ///   - separator: The string to print between items. Default is a single space.
     ///   - terminator: The string to print after all items. Default is a newline.
     ///   - output: An output stream to receive the text representation.
+    @discardableResult
     func print<Target>(
         separator: String = " | ",
         terminator: String = "\n",
         to output: inout Target
-    ) where Target: TextOutputStream {
+    ) -> Self where Target: TextOutputStream {
         let description = self.printableOrder.joined(separator: separator)
         Swift.print(description, terminator: terminator, to: &output)
+        return self
     }
 }
